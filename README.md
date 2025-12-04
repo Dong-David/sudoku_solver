@@ -6,7 +6,6 @@ Welcome to **Christmas Sudoku**! This is a festive version of the classic puzzle
 
 ## ✨ Key Features
 
-
 * **Festive Atmosphere:** Holiday color palette (Red, Green, Gold) and continuous **Snowfall Animation**.
 * **Two Game Modes:**
     * **Player Mode:** The game generates a random Sudoku board for you to solve.
