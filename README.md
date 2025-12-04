@@ -1,69 +1,68 @@
-# 🎄 Sudoku Giáng Sinh (Christmas Edition) ❄️
+# 🎄 Christmas Sudoku Solver ❄️
 
-Chào mừng đến với **Sudoku Giáng Sinh** - một trò chơi giải đố Sudoku cổ điển được khoác lên mình giao diện lễ hội ấm áp với hiệu ứng tuyết rơi và các tính năng hỗ trợ thông minh. Dự án được viết bằng **Python** và thư viện **Pygame**.
+Welcome to **Christmas Sudoku**! This is a festive version of the classic puzzle game, featuring a warm holiday theme, falling snow animation, and an intelligent auto-solver. Built with **Python** and **Pygame**.
 
-![Sudoku Preview](https://via.placeholder.com/600x400?text=Screenshot+Game+Sudoku) 
-*(Bạn có thể thay thế link trên bằng ảnh chụp màn hình game thực tế của bạn)*
+![Sudoku Preview](https://via.placeholder.com/600x400?text=Game+Screenshot+Here)
+*(Replace this link with an actual screenshot of your game)*
 
-## ✨ Tính Năng Chính
+## ✨ Key Features
 
-* **Giao diện Lễ hội:** Tông màu Đỏ, Xanh, Vàng ấm áp cùng hiệu ứng tuyết rơi (Snowfall Animation) liên tục.
-* **Hai Chế độ chơi:**
-    * **Player Mode:** Máy tạo đề, bạn tự giải.
-    * **Input Mode:** Bạn tự nhập đề bài (từ sách, báo...) để máy giải hoặc để tự chơi.
-* **Giải Tự Động (Visual Solver):** Tích hợp thuật toán **Backtracking** (Quay lui) có hiển thị quá trình giải trực quan (Animation "nhảy số").
-* **Hệ thống tiện ích:**
-    * Đồng hồ đếm giờ.
-    * Kiểm tra lỗi sai (số sai sẽ hiện màu đỏ).
-    * Tạo đề mới ngẫu nhiên (New Game).
+* **Festive Atmosphere:** Holiday color palette (Red, Green, Gold) and continuous **Snowfall Animation**.
+* **Two Game Modes:**
+    * **Player Mode:** The game generates a random Sudoku board for you to solve.
+    * **Input Mode:** Enter your own puzzle (from a newspaper or book) and let the computer solve it.
+* **Visual Backtracking Solver:** Watch the computer solve the puzzle in real-time using a backtracking algorithm (with optimized frame-skipping for speed).
+* **Game Utilities:**
+    * Live Timer.
+    * Error detection (invalid moves turn red).
+    * **New Game** generator.
 
-## 🛠️ Cài Đặt
+## 🛠️ Installation & Setup
 
-Để chạy được game, bạn cần cài đặt Python và thư viện Pygame.
+To play the game, you need to have Python installed on your computer.
 
-1.  **Cài đặt Python:** [Tải tại python.org](https://www.python.org/)
-2.  **Cài đặt thư viện Pygame:**
-    Mở Terminal (hoặc CMD) và chạy lệnh sau:
+1.  **Install Python:** Download from [python.org](https://www.python.org/).
+2.  **Install Pygame:** Open your Terminal or Command Prompt and run:
     ```bash
     pip install pygame
     ```
 
-## 🚀 Cách Chạy Game
+## 🚀 How to Run
 
-1.  Đảm bảo bạn có đầy đủ 2 file trong cùng một thư mục:
-    * `main.py` (Source code).
-    * `PlaywriteNO-VariableFont_wght.ttf` (Font chữ Giáng sinh).
-2.  Chạy file `main.py`:
+1.  Ensure both `main.py` and the font file `PlaywriteNO-VariableFont_wght.ttf` are in the **same folder**.
+2.  Run the script:
     ```bash
     python main.py
     ```
 
-## 🎮 Hướng Dẫn Chơi
+## 🎮 Controls
 
-### Các phím điều khiển
-* **Chuột trái:** Chọn ô cần điền số hoặc bấm các nút chức năng.
-* **Phím số (1-9):** Điền số vào ô đã chọn.
-* **Phím Backspace / Delete:** Xóa số trong ô đã chọn.
+### Keyboard & Mouse
+* **Left Click:** Select a cell or click buttons.
+* **Number Keys (1-9):** Fill the selected cell.
+* **Backspace / Delete:** Clear the selected cell.
 
-### Các nút chức năng
-* **New Game:** Tạo một bàn cờ Sudoku mới ngẫu nhiên.
-* **Reset:** Xóa hết các số bạn đã điền, đưa bàn cờ về trạng thái ban đầu.
-* **Solve Now:** Máy tính sẽ tự động giải bài toán cho bạn (có hiệu ứng chạy số).
-* **Input Mode / Player Mode:** Chuyển đổi giữa chế độ nhập đề và chế độ chơi.
+### Buttons
+* **New Game:** Generates a fresh, random board.
+* **Reset:** Clears all numbers you have entered, resetting the board to its initial state.
+* **Solve Now:** Triggers the AI to auto-solve the current board.
+* **Mode: Player/Input:** Toggles between playing yourself or inputting a custom board.
 
-## 🧠 Thuật Toán
+## 🧠 The Algorithm
 
-Game sử dụng thuật toán **Backtracking (Quay lui)** đệ quy để giải Sudoku:
-1.  Tìm một ô trống.
-2.  Thử điền các số từ 1 đến 9.
-3.  Kiểm tra xem số đó có hợp lệ không (không trùng hàng, cột, ô 3x3).
-4.  Nếu hợp lệ, đi tiếp sang ô tiếp theo.
-5.  Nếu đi vào ngõ cụt, quay lại (backtrack) và thử số khác.
+This project uses the **Backtracking Algorithm** to solve the Sudoku grid:
+1.  Finds an empty cell.
+2.  Tries numbers 1-9.
+3.  Checks validity (row, column, 3x3 box).
+4.  Recursively moves to the next cell.
+5.  If a dead-end is reached, it backtracks to the previous cell and tries the next number.
 
-## 📂 Cấu Trúc Thư Mục
+*Note: The visualization includes a frame-skipping technique to ensure the animation is smooth and doesn't take too long to finish.*
+
+## 📂 File Structure
 
 ```text
 Sudoku-Christmas/
-├── main.py                         # Mã nguồn chính của trò chơi
-├── PlaywriteNO-VariableFont_wght.ttf # Font chữ tùy chỉnh
-└── README.md                       # Tài liệu hướng dẫn
+├── main.py                           # Main game source code
+├── PlaywriteNO-VariableFont_wght.ttf # Custom Christmas font
+└── README.md                         # Documentation
