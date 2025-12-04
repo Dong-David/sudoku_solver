@@ -2,10 +2,10 @@
 
 Welcome to **Christmas Sudoku**! This is a festive version of the classic puzzle game, featuring a warm holiday theme, falling snow animation, and an intelligent auto-solver. Built with **Python** and **Pygame**.
 
-![Sudoku Preview](https://via.placeholder.com/600x400?text=Game+Screenshot+Here)
-*(Replace this link with an actual screenshot of your game)*
+<img width="534" height="721" alt="Screenshot 2025-12-04 at 10 02 21" src="https://github.com/user-attachments/assets/274f000f-2131-4901-a2fd-46ff6f47244b" />
 
 ## ✨ Key Features
+
 
 * **Festive Atmosphere:** Holiday color palette (Red, Green, Gold) and continuous **Snowfall Animation**.
 * **Two Game Modes:**
