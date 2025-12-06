@@ -61,7 +61,7 @@ BLACK = (0, 0, 0)
 DARK_BLUE = (10, 20, 60)      
 
 # --- CHỈNH ĐỘ TRONG SUỐT (GLASSMORPHISM) ---
-CELL_BG_ODD = (240, 248, 255, 140)  
+CELL_BG_ODD = (240, 248, 255, 190)  
 CELL_BG_EVEN = (255, 255, 255, 110) 
 
 # Highlight
