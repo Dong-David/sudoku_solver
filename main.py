@@ -24,7 +24,7 @@ BG_PATH = os.path.join(current_dir, BG_FILENAME)
 WOOD_PATH = os.path.join(current_dir, WOOD_FILENAME)
 FONT_PATH = os.path.join(current_dir, FONT_FILENAME)
 
-# --- HÀM TẠO ASSETS (Đã bỏ phần load khung) ---
+# --- HÀM TẠO ASSETS ---
 def create_assets():
     assets = {}
     
@@ -37,7 +37,6 @@ def create_assets():
     # 2. Gỗ (Để làm texture cho nút)
     try:
         wood_raw = pygame.image.load(WOOD_PATH)
-        # Không cắt sẵn, để nguyên để xử lý khi vẽ nút
         assets["wood"] = wood_raw 
     except: assets["wood"] = None
 
@@ -73,6 +72,9 @@ NUM_BLUE = (0, 0, 180)
 NUM_GRAY = (50, 50, 50)         
 NUM_GREEN = (0, 100, 0)         
 SNOW_WHITE = (255, 255, 255)
+
+# --- [MỚI] MÀU BÁO LỖI (ĐỎ CRIMSON DỄ NHÌN) ---
+ERROR_RED = (220, 20, 60) 
 
 # Màu cơ bản cho nút
 BTN_BASE_GRAY = (200, 200, 200)   
@@ -111,10 +113,13 @@ def update_and_draw_snow():
 init_snow()
 
 def is_valid(board, num, pos):
+    # Kiểm tra hàng
     for i in range(9):
         if board[pos[0]][i] == num and pos[1] != i: return False
+    # Kiểm tra cột
     for i in range(9):
         if board[i][pos[1]] == num and pos[0] != i: return False
+    # Kiểm tra ô 3x3
     box_x, box_y = pos[1] // 3, pos[0] // 3
     for i in range(box_y*3, box_y*3 + 3):
         for j in range(box_x*3, box_x*3 + 3):
@@ -127,7 +132,6 @@ def find_empty(board):
             if board[i][j] == 0: return (i, j)
     return None
 
-# Biến đếm số bước để bỏ qua khung hình
 solve_steps = 0 
 
 def solve(board, visualize=False):
@@ -142,13 +146,10 @@ def solve(board, visualize=False):
             
             if visualize:
                 solve_steps += 1
-                # --- PHẦN QUAN TRỌNG: TĂNG TỐC ĐỘ ---
-                # Chỉ vẽ lại màn hình sau mỗi 15 bước (Thay số 15 bằng số lớn hơn để nhanh hơn)
                 if solve_steps % 15 == 0: 
                     draw_window() 
                     pygame.display.update()
                 
-                # Vẫn phải kiểm tra sự kiện để không bị treo máy ("Not Responding")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: 
                         pygame.quit()
@@ -157,9 +158,6 @@ def solve(board, visualize=False):
             if solve(board, visualize): return True
             
             board[row][col] = 0
-            
-            # (Tùy chọn) Có thể bỏ qua vẽ ở bước quay lui (backtrack) để nhanh hơn nữa
-            # Nếu muốn mượt thì giữ lại logic if solve_steps % 15 ở đây
             
     return False
 
@@ -216,15 +214,27 @@ def draw_grid_lines():
         pygame.draw.line(SCREEN, GRID_COLOR, (0, i*CELL_SIZE), (WIDTH, i*CELL_SIZE), thickness)
         pygame.draw.line(SCREEN, GRID_COLOR, (i*CELL_SIZE, 0), (i*CELL_SIZE, WIDTH), thickness)
 
+# --- [ĐÃ SỬA] HÀM VẼ SỐ CÓ KIỂM TRA LỖI ---
 def draw_numbers():
     for r in range(9):
         for c in range(9):
             val = grid[r][c]
             if val != 0:
-                if original_grid[r][c] != 0: color = NUM_BLUE
-                elif is_input_mode: color = NUM_BLUE
-                else: color = NUM_GRAY
+                # 1. Tạm thời nhấc số ra để kiểm tra
+                grid[r][c] = 0
                 
+                # 2. Kiểm tra xem số đó có hợp lệ ở vị trí (r, c) không
+                if not is_valid(grid, val, (r, c)):
+                    color = ERROR_RED  # Bị trùng -> Màu Đỏ
+                else:
+                    # Logic màu cũ
+                    if original_grid[r][c] != 0: color = NUM_BLUE
+                    elif is_input_mode: color = NUM_BLUE
+                    else: color = NUM_GRAY
+                
+                # 3. Trả lại giá trị cho ô
+                grid[r][c] = val 
+
                 text = NUM_FONT.render(str(val), True, color)
                 text_rect = text.get_rect(center=(c*CELL_SIZE + CELL_SIZE//2, r*CELL_SIZE + CELL_SIZE//2))
                 SCREEN.blit(text, text_rect)
@@ -234,12 +244,11 @@ def draw_selection():
         r, c = selected
         pygame.draw.rect(SCREEN, (255, 0, 0), (c*CELL_SIZE, r*CELL_SIZE, CELL_SIZE, CELL_SIZE), 3)
 
-# --- HÀM VẼ NÚT CÓ TEXTURE GỖ ---
 def draw_textured_button(label, x, y, w, h, base_color, is_active=False):
-    # 1. Vẽ bóng đổ (Shadow)
+    # Bóng đổ
     pygame.draw.rect(SCREEN, (30, 30, 30, 180), (x+3, y+3, w, h), border_radius=12)
 
-    # 2. Xử lý Texture Gỗ
+    # Texture Gỗ
     if GAME_ASSETS["wood"]:
         wood_tex = pygame.transform.scale(GAME_ASSETS["wood"], (WIDTH, HEIGHT))
         wood_cut = wood_tex.subsurface((x, y, w, h))
@@ -247,17 +256,17 @@ def draw_textured_button(label, x, y, w, h, base_color, is_active=False):
     else:
         pygame.draw.rect(SCREEN, base_color, (x, y, w, h), border_radius=12)
 
-    # 3. Phủ lớp màu lên gỗ (Tint)
+    # Tint màu
     tint_surface = pygame.Surface((w, h), pygame.SRCALPHA)
     overlay_color = (*base_color, 180) if not is_active else (255, 200, 50, 150)
     pygame.draw.rect(tint_surface, overlay_color, (0, 0, w, h), border_radius=12)
     SCREEN.blit(tint_surface, (x, y))
 
-    # 4. Vẽ Viền
+    # Viền
     border_col = (255, 255, 255) if not is_active else (255, 0, 0)
     pygame.draw.rect(SCREEN, border_col, (x, y, w, h), 2, border_radius=12)
 
-    # 5. Vẽ Chữ (Có bóng nhẹ)
+    # Chữ
     text_surf = SMALL_FONT.render(label, True, WHITE)
     text_shadow = SMALL_FONT.render(label, True, (0,0,0))
     center_x, center_y = x + w//2, y + h//2
@@ -275,16 +284,13 @@ def draw_buttons():
     draw_textured_button("Reset", 290, y2, btn_w, btn_h, BTN_RED)
 
 def draw_window():
-    # 1. Vẽ Ảnh Nền Cây Thông
     if GAME_ASSETS["bg"]:
         SCREEN.blit(GAME_ASSETS["bg"], (0,0))
     else:
         SCREEN.fill(DARK_BLUE)
     
-    # 2. Vẽ Tuyết
     update_and_draw_snow()
 
-    # 3. Vẽ Bàn Cờ (Glassmorphism - Kính trong suốt)
     s_odd = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
     s_odd.fill(CELL_BG_ODD)   
     s_even = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
@@ -298,28 +304,17 @@ def draw_window():
             else:
                  SCREEN.blit(s_even, (x, y))
 
-    # 4. Nội dung bàn cờ
     draw_highlights()
     draw_grid_lines()
     draw_numbers()
     draw_selection()
-    
-    # 5. Vẽ Nút Bấm (Vân gỗ) - Đã bỏ phần vẽ khung
     draw_buttons()
     
-    # Mode Indicator
     mode_text = "Mode: Input" if is_input_mode else "Mode: Player"
-    
-    # Dùng SMALL_FONT thay vì FONT to để nhìn tinh tế hơn và vừa chỗ trống
     text_surf = SMALL_FONT.render(mode_text, True, WHITE)
-    text_shadow = SMALL_FONT.render(mode_text, True, BLACK) # Bóng chữ
-    
-    # Tính toạ độ: 
-    # WIDTH là 540 (đáy bàn cờ), nút bắt đầu từ 570.
-    # Ta đặt chữ ở khoảng 553 là đẹp (giữa khoảng trống đó).
+    text_shadow = SMALL_FONT.render(mode_text, True, BLACK)
     text_rect = text_surf.get_rect(center=(WIDTH // 2, 553))
     
-    # Vẽ bóng trước rồi vẽ chữ đè lên
     SCREEN.blit(text_shadow, (text_rect.x + 1, text_rect.y + 1)) 
     SCREEN.blit(text_surf, text_rect) 
 
@@ -329,7 +324,7 @@ def draw_window():
 # MAIN LOOP
 # ===============================================================
 def main():
-    global selected, grid, original_grid, is_input_mode
+    global selected, grid, original_grid, is_input_mode, solve_steps
     generate_random_puzzle()
     running = True
 
@@ -355,10 +350,8 @@ def main():
                         original_grid = [row[:] for row in grid]
                         is_input_mode = False
                     
-                    solve_steps = 0  # <--- THÊM DÒNG NÀY ĐỂ RESET BỘ ĐẾM
+                    solve_steps = 0
                     solve(grid, visualize=True)
-                    
-                    # Vẽ lại lần cuối cùng khi giải xong để đảm bảo hiện kết quả đầy đủ
                     draw_window()
                     pygame.display.update()
                 elif 290 <= x <= 510 and 635 <= y <= 685: # Reset
@@ -375,8 +368,11 @@ def main():
                     
                     if pygame.K_1 <= event.key <= pygame.K_9:
                         val = event.key - pygame.K_0
-                        if is_input_mode: grid[r][c] = val; original_grid[r][c] = val
-                        elif original_grid[r][c] == 0: grid[r][c] = val
+                        # Chỉ cho phép nhập nếu ô đó không phải ô đề bài (hoặc đang ở Input Mode)
+                        if is_input_mode: 
+                            grid[r][c] = val; original_grid[r][c] = val
+                        elif original_grid[r][c] == 0: 
+                            grid[r][c] = val
                     
                     if event.key == pygame.K_LEFT:  selected = (r, max(0, c - 1))
                     elif event.key == pygame.K_RIGHT: selected = (r, min(8, c + 1))
