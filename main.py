@@ -2,12 +2,13 @@ import pygame
 import sys
 import random
 import os
+import image_scanner
 
 # ===============================================================
 # CẤU HÌNH & KHỞI TẠO
 # ===============================================================
 pygame.init()
-WIDTH, HEIGHT = 540, 700 
+WIDTH, HEIGHT = 540, 750 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Sudoku Noel Edition 🎄❄️")
 clock = pygame.time.Clock() 
@@ -60,8 +61,8 @@ BLACK = (0, 0, 0)
 DARK_BLUE = (10, 20, 60)      
 
 # --- CHỈNH ĐỘ TRONG SUỐT (GLASSMORPHISM) ---
-CELL_BG_ODD = (240, 248, 255, 190)  
-CELL_BG_EVEN = (255, 255, 255, 110) 
+CELL_BG_ODD = (240, 248, 255, 210)  
+CELL_BG_EVEN = (255, 255, 255, 150) 
 
 # Highlight
 HIGHLIGHT_RC = (255, 255, 0, 80)   
@@ -146,7 +147,7 @@ def solve(board, visualize=False):
             
             if visualize:
                 solve_steps += 1
-                if solve_steps % 15 == 0: 
+                if solve_steps % 200 == 0: 
                     draw_window() 
                     pygame.display.update()
                 
@@ -275,11 +276,23 @@ def draw_textured_button(label, x, y, w, h, base_color, is_active=False):
     SCREEN.blit(text_surf, text_rect)
 
 def draw_buttons():
-    y1, y2 = 570, 635
+    # Tính toán vị trí các hàng nút
+    # Grid kết thúc ở 540, ta bắt đầu vẽ nút từ 560
+    y0 = 560  # Hàng nút Scan
+    y1 = 620  # Hàng nút New Game / Input
+    y2 = 680  # Hàng nút Solve / Reset
+    
     btn_w, btn_h = 220, 50
     
+    # --- Nút Mới: Scan Image (Màu tím nhạt để nổi bật) ---
+    # Tọa độ x=160 là căn giữa theo chiều ngang
+    draw_textured_button("Scan Image", 160, y0, btn_w, btn_h, (100, 100, 255))
+
+    # Các nút cũ (dời xuống dưới)
     draw_textured_button("New Game", 30, y1, btn_w, btn_h, BTN_BASE_GRAY)
-    draw_textured_button("Input Mode", 290, y1, btn_w, btn_h, BTN_ORANGE, is_input_mode)
+    # Đổi chữ hiển thị tùy theo trạng thái
+    input_btn_text = "Confirm Input" if is_input_mode else "Input Mode"
+    draw_textured_button(input_btn_text, 290, y1, btn_w, btn_h, BTN_ORANGE, is_input_mode)
     draw_textured_button("Solve Now", 30, y2, btn_w, btn_h, BTN_GREEN)
     draw_textured_button("Reset", 290, y2, btn_w, btn_h, BTN_RED)
 
@@ -339,22 +352,60 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 x, y = pos
-                if y < WIDTH: selected = (y // CELL_SIZE, x // CELL_SIZE)
                 
-                elif 30 <= x <= 250 and 570 <= y <= 620: # New Game
+                # Click vào bảng Sudoku
+                if y < WIDTH: 
+                    selected = (y // CELL_SIZE, x // CELL_SIZE)
+                
+                # --- SỬA LOGIC NÚT SCAN ---
+                elif 160 <= x <= 380 and 560 <= y <= 610:
+                    img_folder = os.path.join(current_dir, "image")
+                    if not os.path.exists(img_folder): os.makedirs(img_folder)
+                    
+                    files = [f for f in os.listdir(img_folder) if f.endswith(('.png', '.jpg', '.jpeg'))]
+                    
+                    if files:
+                        image_path = os.path.join(img_folder, files[0])
+                        print(f"Đang quét: {files[0]}...")
+                        
+                        detected_grid = image_scanner.extract_sudoku_from_image(image_path)
+                        
+                        if detected_grid:
+                            grid = detected_grid
+                            
+                            # [QUAN TRỌNG] Reset original_grid về 0 hết để KHÔNG BỊ KHÓA
+                            original_grid = [[0]*9 for _ in range(9)]
+                            
+                            # Bật chế độ Input để người chơi sửa lại các số nhận diện sai
+                            is_input_mode = True 
+                            selected = None
+                            print("Scan xong! Hãy sửa lỗi sai rồi bấm nút 'Input Mode' lần nữa để chốt.")
+                        else:
+                            print("Lỗi scan.")
+
+                # --- Các nút cũ (Cập nhật lại tọa độ y theo hàm draw_buttons mới) ---
+                elif 30 <= x <= 250 and 620 <= y <= 670: # New Game (y1)
                     generate_random_puzzle(); selected = None
-                elif 290 <= x <= 510 and 570 <= y <= 620: # Input Mode
-                    enable_input_mode(); selected = None
-                elif 30 <= x <= 250 and 635 <= y <= 685: # Solve Now
+                # --- SỬA LOGIC NÚT INPUT MODE (Dùng để Update/Chốt đề bài) ---
+                elif 290 <= x <= 510 and 620 <= y <= 670: 
+                    if is_input_mode:
+                        # Nếu đang nhập -> Bấm vào để LƯU (UPDATE) thành đề bài
+                        original_grid = [row[:] for row in grid] # Chốt số hiện tại làm đề bài
+                        is_input_mode = False # Tắt chế độ nhập
+                        print("Đã Update đề bài thành công!")
+                    else:
+                        # Nếu đang chơi -> Bấm vào để reset làm đề bài mới
+                        enable_input_mode() 
+                    selected = None
+                elif 30 <= x <= 250 and 680 <= y <= 730: # Solve Now (y2)
                     if is_input_mode: 
                         original_grid = [row[:] for row in grid]
                         is_input_mode = False
-                    
                     solve_steps = 0
                     solve(grid, visualize=True)
                     draw_window()
                     pygame.display.update()
-                elif 290 <= x <= 510 and 635 <= y <= 685: # Reset
+                elif 290 <= x <= 510 and 680 <= y <= 730: # Reset (y2)
                     if is_input_mode: grid = [[0]*9 for _ in range(9)]; original_grid = [[0]*9 for _ in range(9)]
                     else: grid = [row[:] for row in original_grid]
 
