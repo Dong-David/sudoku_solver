@@ -36,7 +36,7 @@ To play this game, you need Python installed on your computer.
 1.  **Install Python:** Download it from [python.org](https://www.python.org/).
 2.  **Install Pygame:** Open your Terminal (macOS/Linux) or Command Prompt (Windows) and run:
     ```bash
-    pip install pygame
+    pip install pygame==2.5.2 opencv-python==4.10.0.84 numpy==1.26.4 Pillow==10.3.0 imutils==0.5.4
     ```
 
 ---
